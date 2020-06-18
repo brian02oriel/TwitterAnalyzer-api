@@ -7,8 +7,8 @@ from flask import request, jsonify
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
-from flask_cors import CORS
-cors = CORS(app)
+#from flask_cors import CORS
+#cors = CORS(app)
 
 
 @app.route('/', methods=['GET'])
