@@ -16,11 +16,11 @@ def Auth():
 
     return api
 
-def Tweets(keyword):
+def Tweets(keywords):
     api = Auth()
 
     #Define the search
-    search_words = (keyword).encode('utf-8')
+    search_words = (keywords).encode('utf-8')
     date_since = "2019-06-01"
 
     #Collect tweets
