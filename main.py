@@ -7,8 +7,9 @@ from flask import request, jsonify
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
-#from flask_cors import CORS
-#cors = CORS(app)
+from flask_cors import CORS
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 @app.route('/', methods=['GET'])
@@ -17,9 +18,11 @@ def hello_world():
 
 @app.route('/api/twitter', methods=['POST'])
 def get_tweets():
-    #print(request.args.get('keyword'))
-    keywords = request.args.get('keywords')
+    print("REQUEST json: ",request.json.get('keywords'))    
+    print("\n")
+    keywords = request.json.get('keywords')
     results = Tweets(keywords)
+    print(results)
     return jsonify(results)
 
 app.run()

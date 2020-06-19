@@ -17,6 +17,7 @@ def Auth():
     return api
 
 def Tweets(keywords):
+    print(keywords)
     api = Auth()
 
     #Define the search
