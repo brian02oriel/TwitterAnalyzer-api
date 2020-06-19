@@ -18,11 +18,11 @@ def hello_world():
 
 @app.route('/api/twitter', methods=['POST'])
 def get_tweets():
-    print("REQUEST json: ",request.json.get('keywords'))    
-    print("\n")
+    #print("REQUEST json: ",request.json.get('keywords'))    
+    #print("\n")
     keywords = request.json.get('keywords')
     results = Tweets(keywords)
-    print(results)
+    #print(results)
     return jsonify(results)
 
 app.run()
