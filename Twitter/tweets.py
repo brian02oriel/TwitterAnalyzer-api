@@ -25,15 +25,17 @@ def Tweets(keywords):
     date_since = "2019-06-01"
 
     #Collect tweets
-    tweets = tw.Cursor(api.search, q=search_words, lang="es", since=date_since).items(50)
+    tweets = tw.Cursor(api.search, q=search_words, lang="es", since=date_since).items(100)
 
     #Iterates on tweet
     users_locs = [[tweet.user.screen_name, tweet.text.encode('utf-8'), tweet.user.location , tweet.created_at] for tweet in tweets]
 
     #Create panda dataframe
     tweet_df = pd.DataFrame(data=users_locs, columns = ['user', 'tweet', 'location', 'date'])
-    Summary(keywords, tweet_df)
-
+    words_freq, perception = Summary(keywords, tweet_df)
+    print(words_freq)
+    print('\n')
+    print(perception)
     tweet_json = tweet_df.T.to_dict('list')
 
     return tweet_json

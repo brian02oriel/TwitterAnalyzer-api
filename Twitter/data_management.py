@@ -1,3 +1,4 @@
+import re
 import pandas as pd
 import numpy as np
 from nltk.corpus import stopwords
@@ -14,14 +15,16 @@ def Summary(keywords, tweets_df):
     
     words_freq = WordsFrequencies(tweets_df['cleaning_tweets'])
     
-    SentimentalAnalysis(tweets_df['cleaning_tweets'])
+    perception = PerceptionAnalysis(tweets_df['cleaning_tweets'])
+
+    return words_freq, perception
 
 def WordsFrequencies(tweets):
     prepositions = ['a', 'ante', 'bajo', 'con', 'contra', 'de', 'desde', 'en', 'entre', 
                     'hacia', 'hasta', 'para', 'por', 'pro', 'según', 'sin', 'sobre', 'tras']
     symbols = ['¿', '?', '!', '¡', '“', '”', ':', ';', ',']
     words = ''
-    for key, value in enumerate(tweets):
+    for value in tweets:
         words += value
     
     # Deleting special characters
@@ -52,14 +55,14 @@ def WordsFrequencies(tweets):
     wordfreq_df.reset_index(drop=True, inplace=True)
     return wordfreq_df.head(20)
 
-def SentimentalAnalysis(tweets):
+def PerceptionAnalysis(tweets):
     tw_perception = []
-    absolute_negative = ['verga', 'pinga', 'chucha', 'fck', 'fucking']
+    absolute_negative = ['verga', 'pinga', 'chucha', 'fck', 'fucking', 'hdp', 'puta']
     very_negative = ['horrible', 'terrible', 'horribles', 'terribles','detesto', 'detesta', 'odio', 'odia', 
                     'aborrezco', 'pésimo', 'harta', 'harto']
     negative = ['tóxica', 'tóxico', 'malo', 'mala', 'malos', 'malas','no', 'negativo', 'feo', 'fea', 'feos', 'feas',
                  'preocupa', 'preocupo', 'preocupado', 'preocupada']
-    positive = ['bueno', 'buena', 'buenos', 'buenas','sí', 'positivo', 'positivos',
+    positive = ['gusta', 'gustó', 'bueno', 'buena', 'buenos', 'buenas','sí', 'positivo', 'positivos',
                  'bonito', 'bonita', 'bonitos', 'bonitas','lindo', 'linda' ,'lindos', 'lindas']
     very_positive = ['excelente', 'excelentes','destacado', 'destacada', 'destacados', 'destacadas',
                 'alucinante', 'alucinantes','precioso', 'preciosa','preciosos', 'preciosas',
@@ -69,6 +72,7 @@ def SentimentalAnalysis(tweets):
                     'enorme', 'enormes','gigante','gigantes', 'todo', 'toda', 'todos', 'todas']
     dividers = ['poco', 'poca', 'pocos', 'pocas', 'pequeño', 'pequeña', 'pequeños', 'pequeñas', 'chico', 'chica',
                 'chicos', 'chicas', 'mínimo', 'mínima', 'mínimos', 'mínimas', 'escazo', 'escaza', 'escazos', 'escazas']
+
     absolute_negative_pts = -3
     very_negative_pts = -2
     negative_pts = -1
@@ -78,7 +82,8 @@ def SentimentalAnalysis(tweets):
     multiplier_pts = 2
     divider_pts = 2
 
-    for key, value in enumerate(tweets):
+    for value in tweets:
+        value = deEmojify(value)
         tokens = value.split()
         tw_perception.append({
             'tokens': tokens,
@@ -88,6 +93,7 @@ def SentimentalAnalysis(tweets):
             'divider': 1,
             'total': 0
         })
+
     for tokens in tw_perception:
         pts = 0
         multi = 0
@@ -116,8 +122,44 @@ def SentimentalAnalysis(tweets):
             
         tokens['total'] = round((tokens['multiplier'] * tokens['pts']) / (tokens['divider'] * tokens['len']), 2)
     tw_perception_df = pd.DataFrame(data=tw_perception)
-    print(tw_perception_df)
+    #print(tw_perception_df)
 
+    positive_count = 0
+    negative_count  = 0
+    neutral_count = 0
+    general_perception = 0
+    for value in tw_perception_df['total']:
+        if(value > 0):
+            positive_count += 1
+        elif(value < 0):
+            negative_count += 1
+        else:
+            neutral_count += 1
+        general_perception += value
+    general_perception = round(general_perception/len(tw_perception_df['total']), 2)
+    #print('positive: {0} | negative: {1} | neutral: {2} | general perception: {3}'.format(positive_count, negative_count, neutral_count, general_perception))
+    perception_summary = {
+        'positive': positive_count,
+        'negative': negative_count,
+        'neutral': neutral_count,
+        'general_perception': general_perception
+    }
+    return perception_summary
+
+
+        
+
+    
+
+
+def deEmojify(text):
+    regrex_pattern = re.compile(pattern = "["
+        u"\U0001F600-\U0001F64F"  # emoticons
+        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+        u"\U0001F680-\U0001F6FF"  # transport & map symbols
+        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                           "]+", flags = re.UNICODE)
+    return regrex_pattern.sub(r'',text)
 
 
 
