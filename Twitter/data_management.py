@@ -11,7 +11,7 @@ def Summary(keywords, tweets_df):
     #Cleaning tweets text
     for key, value in enumerate(tweets_df['tweet']):
         value = value.lower().decode('utf8')
-        tweets_df['cleaning_tweets'][key] = value
+        tweets_df['cleaning_tweets'].iloc[key] = value
     
     words_freq = WordsFrequencies(tweets_df['cleaning_tweets'])
     
@@ -53,7 +53,14 @@ def WordsFrequencies(tweets):
     wordfreq_df.sort_values(by=['frequency'], inplace=True, ascending=False)
     wordfreq_df.drop_duplicates(subset=['words', 'frequency'], keep='first', inplace=True)
     wordfreq_df.reset_index(drop=True, inplace=True)
-    return wordfreq_df.head(20)
+    wordlist = list()
+    for index in range(20):
+        wordlist.append({
+            'words': wordfreq_df['words'].iloc[index],
+            'frequency': wordfreq_df['frequency'].iloc[index]
+        })
+    
+    return wordlist
 
 def PerceptionAnalysis(tweets):
     tw_perception = []

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import tweepy as tw
 import pandas as pd
+import json
 from Twitter.data_management import Summary
 
 def Auth():
@@ -33,9 +34,9 @@ def Tweets(keywords):
     #Create panda dataframe
     tweet_df = pd.DataFrame(data=users_locs, columns = ['user', 'tweet', 'location', 'date'])
     words_freq, perception = Summary(keywords, tweet_df)
-    print(words_freq)
-    print('\n')
-    print(perception)
-    tweet_json = tweet_df.T.to_dict('list')
-
-    return tweet_json
+    tw_summary = {
+        'words_freq': words_freq,
+        'perception': perception,
+    }
+    tw_summary = str(tw_summary)
+    return tw_summary
