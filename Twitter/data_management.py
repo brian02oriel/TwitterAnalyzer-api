@@ -11,7 +11,7 @@ def Summary(keywords, tweets_df):
     #Cleaning tweets text
     for key, value in enumerate(tweets_df['tweet']):
         value = value.lower().decode('utf8')
-        tweets_df['cleaning_tweets'].iloc[key] = value
+        tweets_df.loc[key, 'cleaning_tweets']= value
     
     words_freq = WordsFrequencies(tweets_df['cleaning_tweets'])
     
