@@ -13,16 +13,16 @@ def Summary(keywords, tweets_df):
         value = value.lower().decode('utf8')
         tweets_df.loc[key, 'cleaning_tweets']= value
     
-    words_freq = WordsFrequencies(tweets_df['cleaning_tweets'])
+    words_freq = WordsFrequencies(keywords, tweets_df['cleaning_tweets'])
     
     perception = PerceptionAnalysis(tweets_df['cleaning_tweets'])
 
     return words_freq, perception
 
-def WordsFrequencies(tweets):
+def WordsFrequencies(keywords, tweets):
     prepositions = ['a', 'ante', 'bajo', 'con', 'contra', 'de', 'desde', 'en', 'entre', 
                     'hacia', 'hasta', 'para', 'por', 'pro', 'según', 'sin', 'sobre', 'tras']
-    symbols = ['¿', '?', '!', '¡', '“', '”', ':', ';', ',']
+    symbols = ['¿', '?', '!', '¡', '“', '”', '.',':', ';', ',', '|', '#', '-']
     words = ''
     for value in tweets:
         words += value
@@ -35,7 +35,7 @@ def WordsFrequencies(tweets):
 
     # Deleting prepositions
     for index, word in enumerate(wordlist):
-        if(word in prepositions or word in stopwords.words('spanish')):
+        if(word in prepositions or word in stopwords.words('spanish') or word in keywords):
             wordlist[index] = ''
         
     wordlist = [value for value in wordlist if(value != '')]
@@ -54,10 +54,10 @@ def WordsFrequencies(tweets):
     wordfreq_df.drop_duplicates(subset=['words', 'frequency'], keep='first', inplace=True)
     wordfreq_df.reset_index(drop=True, inplace=True)
     wordlist = list()
-    for index in range(20):
+    for index in range(100):
         wordlist.append({
-            'words': wordfreq_df['words'].iloc[index],
-            'frequency': wordfreq_df['frequency'].iloc[index]
+            'text': wordfreq_df['words'].iloc[index],
+            'value': int(wordfreq_df['frequency'].iloc[index])
         })
     
     return wordlist
