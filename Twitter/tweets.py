@@ -26,7 +26,7 @@ def Tweets(keywords):
     date_since = "2019-06-01"
 
     #Collect tweets
-    tweets = tw.Cursor(api.search, q=search_words, lang="es", since=date_since).items(500)
+    tweets = tw.Cursor(api.search, q=search_words, lang="es", since=date_since).items(250)
 
     #Iterates on tweet
     users_locs = [[tweet.user.screen_name, tweet.text.encode('utf-8'), tweet.user.location , tweet.created_at] for tweet in tweets]

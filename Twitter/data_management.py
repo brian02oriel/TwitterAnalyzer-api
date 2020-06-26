@@ -54,7 +54,7 @@ def WordsFrequencies(keywords, tweets):
     wordfreq_df.drop_duplicates(subset=['words', 'frequency'], keep='first', inplace=True)
     wordfreq_df.reset_index(drop=True, inplace=True)
     wordlist = list()
-    for index in range(100):
+    for index in range(50):
         wordlist.append({
             'text': wordfreq_df['words'].iloc[index],
             'value': int(wordfreq_df['frequency'].iloc[index])
