@@ -1,3 +1,4 @@
 ./vscode
 .flaskenv
 .env
+./Twitter/__pycache__
