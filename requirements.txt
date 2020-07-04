@@ -1,4 +1,8 @@
 flask
-pandas
+random
 tweepy
-flask_cors
+pandas
+json
+re
+numpy
+nltk
