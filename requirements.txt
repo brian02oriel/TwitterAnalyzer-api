@@ -1,8 +1,6 @@
 flask
-random
+flask_cors
 tweepy
 pandas
-json
-re
 numpy
 nltk
