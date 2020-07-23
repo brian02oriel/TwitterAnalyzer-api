@@ -4,20 +4,23 @@ import numpy as np
 import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
+import itertools
+from joblib import dump, load
+
 
 def Summary(keywords, tweets_df):
     # Creating a new column in pandas
     sLength = len(tweets_df['tweet'])
-    tweets_df['cleaning_tweets'] = pd.Series(np.random.randn(sLength), index=tweets_df.index)
+    tweets_df['clear_tweets'] = pd.Series(np.random.randn(sLength), index=tweets_df.index)
 
     #Cleaning tweets text
     for key, value in enumerate(tweets_df['tweet']):
         value = value.lower().decode('utf8')
-        tweets_df.loc[key, 'cleaning_tweets']= value
+        tweets_df.loc[key, 'clear_tweets']= value
     
-    words_freq = WordsFrequencies(keywords, tweets_df['cleaning_tweets'])
+    words_freq = WordsFrequencies(keywords, tweets_df['clear_tweets'])
     
-    perception = PerceptionAnalysis(tweets_df['cleaning_tweets'])
+    perception = PerceptionAnalysis(tweets_df)
 
     return words_freq, perception
 
@@ -64,23 +67,37 @@ def WordsFrequencies(keywords, tweets):
     
     return wordlist
 
-def PerceptionAnalysis(tweets):
-    tw_perception = []
-    absolute_negative = ['verga', 'pinga', 'chucha', 'fck', 'fucking', 'hdp', 'puta']
+def PerceptionAnalysis(tweets_df):
+    # Creating empty columns
+    empty_column = np.empty([500, 1])
+    empty_column[:] = np.zeros(1)
+    # Creating empty array column
+    empty_column_array = np.zeros(3)
+
+    # Merging a temp Dataframe with the empty array column with the tweets Dataframe
+    temp_df = pd.DataFrame({'tokens': [empty_column_array], 'scores': [empty_column_array]})
+    tweets_df = pd.merge(tweets_df, temp_df, how='left', left_index=True, right_index=True)
+    # Adding column with empty cells (0)
+    tweets_df['length'] = empty_column
+    tweets_df['absolutely_negative'] = empty_column
+    tweets_df['very_negative'] = empty_column
+    tweets_df['negative'] = empty_column
+    tweets_df['neutral'] = empty_column
+    tweets_df['positive'] = empty_column
+    tweets_df['very_positive'] = empty_column
+    tweets_df['perception'] = empty_column
+
+    absolute_negative = ['verga', 'pinga', 'chucha', 'fck', 'fucking', 'hdp', 'puta', 'mierda']
     very_negative = ['horrible', 'terrible', 'horribles', 'terribles','detesto', 'detesta', 'odio', 'odia', 
-                    'aborrezco', 'pésimo', 'harta', 'harto']
-    negative = ['tóxica', 'tóxico', 'malo', 'mala', 'malos', 'malas','no', 'negativo', 'feo', 'fea', 'feos', 'feas',
-                 'preocupa', 'preocupo', 'preocupado', 'preocupada']
-    positive = ['gusta', 'gustó', 'bueno', 'buena', 'buenos', 'buenas','sí', 'positivo', 'positivos',
-                 'bonito', 'bonita', 'bonitos', 'bonitas','lindo', 'linda' ,'lindos', 'lindas']
-    very_positive = ['excelente', 'excelentes','destacado', 'destacada', 'destacados', 'destacadas',
+                    'aborrezco', 'pésimo', 'harta', 'harto', 'hartas', 'hartos', 'enojarse', 'enojado', 'enojada', 'enojados', 'enojadas']
+    negative = ['maliciosa', 'malicioso', 'maliciosas', 'maliciosos','tóxica', 'tóxico', 'malo', 'mala', 'malos', 'malas','no', 'negativo', 'feo', 'fea', 'feos', 'feas',
+                'preocupa', 'preocupo', 'preocupado', 'preocupada']
+    positive = ['bien', 'de acuerdo','gusta', 'gustó', 'bueno', 'buena', 'buenos', 'buenas','sí', 'positivo', 'positivos',
+                'bonito', 'bonita', 'bonitos', 'bonitas','lindo', 'linda' ,'lindos', 'lindas']
+    very_positive = ['romance', 'amor', 'mejor', 'feliz', 'excelente', 'excelentes','destacado', 'destacada', 'destacados', 'destacadas',
                 'alucinante', 'alucinantes','precioso', 'preciosa','preciosos', 'preciosas',
                 'bello', 'bella', 'bellos', 'bellas','hermoso', 'hermosa', 'hermosos', 'hermosas',
-                'asombroso', 'asombrosa', 'asombrosos', 'asombrosas','impresionante','impresionantes']
-    multipliers = ['mucho', 'mucha', 'muchos', 'muchas','bastante', 'bastantes','abundante', 'abundantes',
-                    'enorme', 'enormes','gigante','gigantes', 'todo', 'toda', 'todos', 'todas']
-    dividers = ['poco', 'poca', 'pocos', 'pocas', 'pequeño', 'pequeña', 'pequeños', 'pequeñas', 'chico', 'chica',
-                'chicos', 'chicas', 'mínimo', 'mínima', 'mínimos', 'mínimas', 'escazo', 'escaza', 'escazos', 'escazas']
+                'asombroso', 'asombrosa', 'asombrosos', 'asombrosas','impresionante','impresionantes', 'felicito', 'felicidades']
 
     absolute_negative_pts = -3
     very_negative_pts = -2
@@ -88,87 +105,78 @@ def PerceptionAnalysis(tweets):
     neutral_pts = 0
     positive_pts = 1
     very_positive_pts = 2
-    multiplier_pts = 2
-    divider_pts = 2
 
-    for value in tweets:
-        value = deEmojify(value)
-        tokens = value.split()
-        tw_perception.append({
-            'tokens': tokens,
-            'len': len(tokens),
-            'pts': 0,
-            'multiplier': 1,
-            'divider': 1,
-            'total': 0
-        })
-
-    for tokens in tw_perception:
-        pts = 0
-        multi = 0
-        div = 0
-        for text in tokens['tokens']:
-            if(text in absolute_negative):
-                pts += absolute_negative_pts
-            elif(text in very_negative):
-                pts += very_negative_pts
-            elif(text in negative):
-                pts += negative_pts
-            elif(text in positive):
-                pts += positive_pts
-            elif(text in very_positive):
-                pts += very_positive_pts
-            elif(text in multipliers):
-                multi += multiplier_pts
-                tokens['multiplier'] = multi
-            elif(text in dividers):
-                div += divider_pts
-                tokens['divider'] = div
+    for key, value in enumerate(tweets_df['clear_tweets']):
+        tweets_df['tokens'].iloc[key] = value.split()
+        tweets_df['length'].iloc[key] = len(value)
+    
+    for key, value in enumerate(tweets_df['tokens']):
+        scores = list()
+        for text in value:
+            if(any(text in sub for sub in absolute_negative)):
+                scores.append(absolute_negative_pts)
+            elif(any(text in sub for sub in very_negative)):
+                scores.append(very_negative_pts)
+            elif(any(text in sub for sub in negative)):
+                scores.append(negative_pts)
+            elif(any(text in sub for sub in positive)):
+                scores.append(positive_pts)
+            elif(any(text in sub for sub in very_positive)):
+                scores.append(very_positive_pts)
             else:
-                pts += neutral_pts
-            
-            tokens['pts'] = pts
-            
-        tokens['total'] = round((tokens['multiplier'] * tokens['pts']) / (tokens['divider'] * tokens['len']), 2)
-    tw_perception_df = pd.DataFrame(data=tw_perception)
-    #print(tw_perception_df)
+                scores.append(neutral_pts)
+        tweets_df['scores'].iloc[key] = np.array(scores)
+    
+    
+    for key, value in enumerate(tweets_df['scores']):
+        freqs = [i for i, j in itertools.groupby(value)]
+        #print(freqs)
+        for score in freqs:
+            #(score, _ ) = freqs[index]
+            if(score == -3):
+                tweets_df['absolutely_negative'].iloc[key] += 1
+            elif(score == -2):
+                tweets_df['very_negative'].iloc[key] += 1
+            elif(score == -1):
+                tweets_df['negative'].iloc[key] += 1
+            elif(score == 1):
+                tweets_df['positive'].iloc[key] += 1
+            elif(score == 2):
+                tweets_df['very_positive'].iloc[key] += 1
+            else:
+                tweets_df['neutral'].iloc[key] += 1
 
-    positive_count = 0
-    negative_count  = 0
-    neutral_count = 0
-    general_perception = 0
-    for value in tw_perception_df['total']:
-        if(value > 0):
-            positive_count += 1
-        elif(value < 0):
-            negative_count += 1
-        else:
-            neutral_count += 1
-        general_perception += value
-    general_perception = round(general_perception/len(tw_perception_df['total']), 2)
-    #print('positive: {0} | negative: {1} | neutral: {2} | general perception: {3}'.format(positive_count, negative_count, neutral_count, general_perception))
-    perception_summary = {
-        'positive': positive_count,
-        'negative': negative_count,
-        'neutral': neutral_count,
-        'general_perception': general_perception
-    }
-    return perception_summary
+    features = ['length', 'absolutely_negative', 'very_negative', 'negative', 'neutral', 'positive', 'very_positive']
+    X = tweets_df[features]
+    clf = load('Twitter/model.joblib')
+    y = clf.predict(X)
+    perception = ShowClass(y)
+    perception_count = {'very_negative': 0,'negative': 0, 'neutral': 0, 'positive': 0, 'very_positive': 0}
+    for value in perception:
+        perception_count[value] += 1
+
+    return perception_count
 
 
         
-
+def ShowClass(prediction):    
+    predicted_classes = list()
+    classes = {-2: 'very_negative', -1: 'negative', 0: 'neutral', 1: 'positive', 2: 'very_positive'}
+    for value in prediction:
+        predicted_classes.append(classes[value])
+    
+    return predicted_classes
     
 
 
-def deEmojify(text):
-    regrex_pattern = re.compile(pattern = "["
-        u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
-                           "]+", flags = re.UNICODE)
-    return regrex_pattern.sub(r'',text)
+#def deEmojify(text):
+#    regrex_pattern = re.compile(pattern = "["
+#        u"\U0001F600-\U0001F64F"  # emoticons
+#        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+#        u"\U0001F680-\U0001F6FF"  # transport & map symbols
+#        u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+#                           "]+", flags = re.UNICODE)
+#    return regrex_pattern.sub(r'',text)
 
 
 

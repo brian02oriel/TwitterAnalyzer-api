@@ -37,7 +37,7 @@ def Tweets(keywords):
     tweet_df = pd.DataFrame(data=users_locs, columns = ['user', 'tweet', 'location', 'date'])
     words_freq, perception = Summary(keywords, tweet_df)
     random_index = random.randint(0, int(environ.get('DEVELOPMENT_TWEETS_COUNT')))
-    print(tweet_df['tweet'].iloc[random_index])
+    #print(tweet_df['tweet'].iloc[random_index])
     tw_summary = {
         'random_tweet': {
                     'user': tweet_df['user'].iloc[random_index],
