@@ -69,7 +69,7 @@ def WordsFrequencies(keywords, tweets):
 
 def PerceptionAnalysis(tweets_df):
     # Creating empty columns
-    empty_column = np.empty([500, 1])
+    empty_column = np.empty([len(tweets_df['tweet']), 1])
     empty_column[:] = np.zeros(1)
     # Creating empty array column
     empty_column_array = np.zeros(3)
