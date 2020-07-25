@@ -92,7 +92,7 @@ def PerceptionAnalysis(tweets_df):
                     'aborrezco', 'pésimo', 'harta', 'harto', 'hartas', 'hartos', 'enojarse', 'enojado', 'enojada', 'enojados', 'enojadas']
     negative = ['maliciosa', 'malicioso', 'maliciosas', 'maliciosos','tóxica', 'tóxico', 'malo', 'mala', 'malos', 'malas','no', 'negativo', 'feo', 'fea', 'feos', 'feas',
                 'preocupa', 'preocupo', 'preocupado', 'preocupada']
-    positive = ['bien', 'de acuerdo','gusta', 'gustó', 'bueno', 'buena', 'buenos', 'buenas','sí', 'positivo', 'positivos',
+    positive = ['viva', 'vivas', 'vivo', 'vivos', 'bien', 'de acuerdo','gusta', 'gustó', 'bueno', 'buena', 'buenos', 'buenas','sí', 'positivo', 'positivos',
                 'bonito', 'bonita', 'bonitos', 'bonitas','lindo', 'linda' ,'lindos', 'lindas']
     very_positive = ['romance', 'amor', 'mejor', 'feliz', 'excelente', 'excelentes','destacado', 'destacada', 'destacados', 'destacadas',
                 'alucinante', 'alucinantes','precioso', 'preciosa','preciosos', 'preciosas',
